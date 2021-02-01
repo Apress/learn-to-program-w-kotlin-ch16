@@ -1,0 +1,246 @@
+Section 16.2:
+fun checkSingleColorPicture(picture: Picture, expectedColor: Color, expectedHeight: Int, expectedWidth: Int) {
+    Assert.assertEquals(picture.height(), expectedHeight)
+    Assert.assertEquals(picture.width(), expectedWidth)
+    for (row in 0..expectedHeight - 1) {
+        for (column in 0..expectedWidth - 1) {
+            Assert.assertEquals(picture.pixelByRowColumn(row, column), expectedColor)
+        }
+    }
+}
+
+Just before Programming Challenge 16.1:
+@Test
+fun cropToRedSquare() {
+    val tiles100 = load("red_blue_tiles_50.png")
+    val cropped = tiles100.cropTo(0, 0, 50, 50)
+    val expectedColor = Color(255, 0, 0)
+    checkSingleColorPicture(cropped, expectedColor, 50, 50)
+}
+
+Just after Programming Challenge 16.5:
+fun chopIntoSquares(sideLength: Int): Array<Array<Picture>> {
+    val resultRows = height() / sideLength
+    val resultColumns = width() / sideLength
+    val result = Array<Array<Picture>>(resultRows) {
+        blockRow ->
+        Array<Picture>(resultColumns) {
+            blockColumn ->
+            cropTo(blockRow * sideLength, blockColumn * sideLength, sideLength, sideLength)
+        }
+    }
+    return result
+}
+
+
+Just after Programming Challenge 16.6:
+@Test
+fun chopIntoSquaresTest() {
+    val original = load("red_blue_green.png")
+    val blocks = original.chopIntoSquares(10)
+    Assert.assertEquals(10, blocks.size)//10 rows
+    Assert.assertEquals(10, blocks[0].size)//10 columns
+    val red = Color(255, 0, 0)
+    val blue = Color(0, 0, 255)
+    for (row in 0..4) {
+        for (column in 0..4) {
+            checkSingleColorPicture(blocks[row][column], red, 10, 10)
+        }
+        for (column in 5..9) {
+            checkSingleColorPicture(blocks[row][column], blue, 10, 10)
+        }
+    }
+    for (row in 5..9) {
+        for (column in 0..4) {
+            checkSingleColorPicture(blocks[row][column], blue, 10, 10)
+        }
+        for (column in 5..9) {
+            checkSingleColorPicture(blocks[row][column], red, 10, 10)
+        }
+    }
+}
+
+
+Just before Programming Challenge 16.7:
+fun averageColor(): Color {
+    return Color(0, 0, 0)
+}
+
+Programming Challenge 16.7:
+fun averageColorTest() {
+    val red10 = load("red10.png")
+    Assert.assertEquals(Color(255, 0, 0), red10.averageColor())
+}
+
+Programming Challenge 16.8:
+for (row in 0..height() - 1) {
+    for (column in 0..width() - 1) {
+        val pixel = pixelByRowColumn(row, column)
+		
+    }
+}
+
+
+Programming Challenge 16.9:
+fun averageColor(): Color {
+    var totalRed = 0
+    for (row in 0..height() - 1) {
+        for (column in 0..width() - 1) {
+            val pixel = pixelByRowColumn(row, column)
+            totalRed = totalRed + pixel.red
+        }
+    }
+    val count = height() * width()
+    return Color(totalRed / count, 0, 0)
+}
+
+Programming Challenge 16.10:
+fun scaleDown(factor: Int) : Picture {
+    return this
+}
+
+Just after Programming Challenge 16.10:
+@Test
+fun scaleDownTest() {
+    val image1 = load("red_blue_green.png")
+    val scaled1 = image1.scaleDown(10)
+    val expected1 = load("red_blue_tiles_5.png")
+    checkPicture(scaled1, expected1)
+
+    val image2 = load("green_black_large.png")
+    val scaled2 = image2.scaleDown(3)
+    val expected2 = load("green_black_small.png")
+    checkPicture(scaled2, expected2)
+}
+
+End of Section 16.3:
+fun scaleDown(factor: Int) : Picture {
+    //First break it into a double array
+    //of factor-by-factor square sub-pictures.
+    val blocks = chopIntoSquares(factor)
+    //Initialise a pixel array using the blocks.
+    val newPixels = Array<Array<Color>>(blocks.size) {
+        blocksRow ->
+        Array<Color>(blocks[blocksRow].size) {
+            blocksColumn ->
+            //Each pixel is the average color of the 
+            //corresponding block.
+            blocks[blocksRow][blocksColumn].averageColor()
+        }
+    }
+    return Picture(newPixels)
+}
+
+override fun createPicture(): Picture {
+    val file = Paths.get(IMAGES + "ladyagnew.png").toFile()
+    return loadPictureFromFile(file).scaleDown(5)
+}
+
+
+Section 16.4:
+fun saveTo(file: File) {
+    val image = BufferedImage(width(), height(), BufferedImage.TYPE_INT_RGB)
+    val width = width()
+    val height = height()
+    for (row in 0..height - 1) {
+        for (column in 0..width - 1) {
+            image.setRGB(column, row, pixelByRowColumn(row, column).rgb)
+        }
+    }
+    ImageIO.write(image, "png", file)
+}
+
+@Test
+fun saveToTest() {
+    val picture = load("green_black_small.png")
+    val temp = Paths.get("temp.png").toFile()
+    picture.saveTo(temp)
+    val reloaded = loadPictureFromFile(temp)
+    Assert.assertEquals(20, reloaded.height())
+    Assert.assertEquals(40, reloaded.width())
+    val green = Color(0, 255, 0)
+    val black = Color(0, 0, 0)
+    for (row in 0..9) {
+        for (column in 0..39) {
+            val pixel = reloaded.pixelByRowColumn(row, column)
+            Assert.assertEquals(green, pixel)
+        }
+    }
+    for (row in 10..19) {
+        for (column in 0..39) {
+            val pixel = reloaded.pixelByRowColumn(row, column)
+            Assert.assertEquals(black, pixel)
+        }
+    }
+}
+
+
+---- Solutions to Programming Challenges ----
+Solution 16.1:
+@Test
+fun cropToBlueRectangle() {
+    val tiles100 = load("red_blue_tiles_50.png")
+    val cropped = tiles100.cropTo(50, 10, 10, 20)
+    val expectedColor = Color(0, 0, 255)
+    Assert.assertEquals(cropped.height(), 10)
+    Assert.assertEquals(cropped.width(), 20)
+    for (row in 0..9) {
+        for (column in 0..19) {
+            Assert.assertEquals(cropped.pixelByRowColumn(row, column), expectedColor)
+        }
+    }
+}
+
+Solution 16.3:
+fun cropTo(rowAt: Int, columnAt: Int, h: Int, w: Int): Picture {
+    val cropArray = Array<Array<Color>>(h) {
+        row ->
+        Array<Color>(w) {
+            column ->
+            pixelByRowColumn(rowAt + row, columnAt + column)
+        }
+    }
+    return Picture(cropArray)
+}
+
+Solution 16.4:
+@Test
+fun cropToBlueRectangle() {
+    val tiles100 = load("red_blue_tiles_50.png")
+    val cropped = tiles100.cropTo(50, 10, 10, 20)
+    val expectedColor = Color(0, 0, 255)
+    checkSingleColorPicture(cropped, expectedColor, 10, 20)
+}
+
+Solution 16.7:
+@Test
+fun averageColorTest() {
+    val red10 = load("red10.png")
+    Assert.assertEquals(Color(255, 0, 0), red10.averageColor())
+
+    val green10 = load("green10.png")
+    Assert.assertEquals(Color(0, 255, 0), green10.averageColor())
+
+    val blue10 = load("blue10.png")
+    Assert.assertEquals(Color(0, 0, 255), blue10.averageColor())
+
+    val redblue = load("red_blue_tiles_50.png")
+    Assert.assertEquals(Color(127, 0, 127), redblue.averageColor())
+}
+
+Solution 16.9:
+fun averageColor(): Color {
+    var totalRed = 0
+    var totalGreen = 0
+    var totalBlue = 0
+    for (row in 0..height() - 1) {
+        for (column in 0..width() - 1) {
+            val pixel = pixelByRowColumn(row, column)
+            totalRed = totalRed + pixel.red
+            totalGreen = totalGreen + pixel.green
+            totalBlue = totalBlue + pixel.blue
+        }
+    }
+    val count = height() * width()
+    return Color(totalRed / count, totalGreen / count, totalBlue / count)
+}
