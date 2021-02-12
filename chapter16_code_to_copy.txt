@@ -119,10 +119,10 @@ fun scaleDown(factor: Int) : Picture {
     //of factor-by-factor square sub-pictures.
     val blocks = chopIntoSquares(factor)
     //Initialise a pixel array using the blocks.
-    val newPixels = Array<Array<Color>>(blocks.size) {
-        blocksRow ->
-        Array<Color>(blocks[blocksRow].size) {
-            blocksColumn ->
+    val newPixels = Array(blocks.size) {
+            blocksRow ->
+        Array(blocks[blocksRow].size) {
+                blocksColumn ->
             //Each pixel is the average color of the 
             //corresponding block.
             blocks[blocksRow][blocksColumn].averageColor()
@@ -130,6 +130,7 @@ fun scaleDown(factor: Int) : Picture {
     }
     return Picture(newPixels)
 }
+
 
 override fun createPicture(): Picture {
     val file = Paths.get(IMAGES + "ladyagnew.png").toFile()
