@@ -22,10 +22,10 @@ Just after Programming Challenge 16.5:
 fun chopIntoSquares(sideLength: Int): Array<Array<Picture>> {
     val resultRows = height() / sideLength
     val resultColumns = width() / sideLength
-    val result = Array<Array<Picture>>(resultRows) {
-        blockRow ->
-        Array<Picture>(resultColumns) {
-            blockColumn ->
+    val result = Array(resultRows) {
+            blockRow ->
+        Array(resultColumns) {
+                blockColumn ->
             cropTo(blockRow * sideLength, blockColumn * sideLength, sideLength, sideLength)
         }
     }
