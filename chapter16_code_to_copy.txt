@@ -194,9 +194,9 @@ fun cropToBlueRectangle() {
 
 Solution 16.3:
 fun cropTo(rowAt: Int, columnAt: Int, h: Int, w: Int): Picture {
-    val cropArray = Array<Array<Color>>(h) {
+    val cropArray = Array(h) {
         row ->
-        Array<Color>(w) {
+        Array(w) {
             column ->
             pixelByRowColumn(rowAt + row, columnAt + column)
         }
